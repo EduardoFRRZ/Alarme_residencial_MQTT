@@ -1,11 +1,11 @@
-//Programa : Sensor de presenca com modulo PIR
-//Autor : FILIPEFLOP
+//Programa : ALARME RESIDÊNCIAL MQTT
+//Autor : Eduardo Ferrarezi e William Agostini
 
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
-const char* ssid = "........";
-const char* password = "........";
+const char* ssid = "Net Virtua 577";
+const char* password = "1000160930";
 const char* mqtt_server = "broker.mqtt-dashboard.com";
 
 WiFiClient espClient;
@@ -14,45 +14,47 @@ long lastMsg = 0;
 char msg[50];
 int value = 0;
 
-int pinoRele = 13; //Pino ligado ao rele
-int acionamento; //Variavel para guardar valor do sensor
-int pinoSensorPir = 15;
+//definição do pino de saída do sensor PIR HC (Sensor de presença) 
+#define PIN_SENSOR D4
+
+//definição do pino de entrada do Buzzer
+#define PIN_BUZZER D1
+
+int dado;
  
 void setup(){
-  
-  pinMode(pinoRele, OUTPUT); //Define pino rele como saida
-  pinMode(pinoSensorPir, INPUT); //Define pino sensor como entrada
+  //Definir os pinos como entrada ou saída de dados
+  pinMode(PIN_SENSOR, INPUT);
+  pinMode(PIN_BUZZER, OUTPUT);
 
   Serial.begin(115200);
   setup_wifi();
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
-
 }
- 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void loop(){
   
-  acionamento = digitalRead(pinoSensorPir); //Le o valor do sensor PIR
+  dado = digitalRead(PIN_SENSOR); //Le o valor do sensor PIR
  
-  if (acionamento == LOW) //Sem movimento, mantem rele desligado
-  {
-    digitalWrite(pinoRele, LOW);
-    Serial.println(acionamento);
-  }
-    else //Caso seja detectado um movimento, aciona o rele
-  {
-    digitalWrite(pinoRele, HIGH);
-    Serial.println(acionamento);
-  }
+  Serial.println(dado);
+  delay(1000);
 
-  
+
+
+
+
+
+
+/////////////////////////////////////////////////////////////////  
   if (!client.connected()) {
     reconnect();
   }
-  client.loop();
-
-  
+  client.loop(); 
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void setup_wifi() {
 
