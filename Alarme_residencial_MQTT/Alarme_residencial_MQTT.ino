@@ -11,26 +11,24 @@ const char* password = "agostini";
 
 const char* mqtt_server = "broker.mqtt-dashboard.com";
 
-const char* topico_alarme = "alarme";
-
 WiFiClient espClient;
 PubSubClient client(espClient);
 long lastMsg = 0;
 char msg[50];
 int value = 0;
 
-//definição do pino de saída do sensor PIR HC (Sensor de presença) 
-#define PIN_SENSOR D4
+#define PIN_SENSOR D4 //definição do pino de saída do sensor PIR HC (Sensor de presença)
+#define PIN_BUZZER D1 //definição do pino de entrada do Buzzer
+#define PIN_LED D2 //definição do pino de entrada do LED
 
-//definição do pino de entrada do Buzzer
-#define PIN_BUZZER D1
+const char* topico_alarme = "unoesc/alarme";
+const char* topico_led = "unoesc/led";
 
-int dado;
- 
-void setup(){
+void setup() {
   //Definir os pinos como entrada ou saída de dados
   pinMode(PIN_SENSOR, INPUT);
   pinMode(PIN_BUZZER, OUTPUT);
+  pinMode(PIN_LED, OUTPUT);
 
   Serial.begin(115200);
   setup_wifi();
@@ -45,25 +43,32 @@ void loop() {
   }
   client.loop();
 
-  int acionamento = digitalRead(pinoSensorPir); //Le o valor do sensor PIR
-  delay(500);
-  Serial.println("sensor PIR");
-  Serial.println(acionamento);
-  if (acionamento == HIGH) //Sem movimento
-  {
-    client.publish(topico_alarme, "alto");
-  }
-  else {
-    client.publish(topico_alarme, "baixo");
+  long now = millis();
+  if (millis() - lastMsg > 1000) {
+    lastMsg = now;
+    veriricarSensorPIR();
+    // snprintf (msg, 50, "hello world #%ld", value);
+    client.publish("outTopic", msg);
   }
 
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void veriricarSensorPIR() {
+  int acionamento = digitalRead(PIN_SENSOR); //Le o valor do sensor PIR
+  //  Serial.println("sensor PIR");
+  //  Serial.println(acionamento);
+
+  snprintf (msg, 50, "%ld", acionamento);
+
+  client.publish(topico_alarme, msg);
+
+  //if (acionamento == HIGH) //Sem movimento
+}
+
 void setup_wifi() {
 
   delay(10);
-  // We start by connecting to a WiFi network
   Serial.println();
   Serial.print("Connecting to ");
   Serial.println(ssid);
@@ -83,6 +88,16 @@ void setup_wifi() {
   Serial.println(WiFi.localIP());
 }
 
+void acaoLed(char payload) {
+  Serial.println("aqui");
+  Serial.println(payload);
+  if (payload == 1 || payload == '1') {
+    digitalWrite(PIN_LED, HIGH);
+  } else {
+    digitalWrite(PIN_LED, LOW);
+  }
+}
+
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived [");
   Serial.print(topic);
@@ -92,15 +107,14 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
   Serial.println();
 
-  // Switch on the LED if an 1 was received as first character
-  if ((char)payload[0] == '1') {
-    digitalWrite(BUILTIN_LED, LOW);   // Turn the LED on (Note that LOW is the voltage level
-    // but actually the LED is on; this is because
-    // it is active low on the ESP-01)
-  } else {
-    digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
-  }
+  if (String(topic) == String(topico_led))
+    acaoLed((char)payload[0]);
+}
 
+void reconectarNosTopicos() {
+  client.publish("outTopic", "hello world");
+  client.subscribe("inTopic");
+  client.subscribe(topico_led);
 }
 
 void reconnect() {
@@ -113,10 +127,7 @@ void reconnect() {
     // Attempt to connect
     if (client.connect(clientId.c_str())) {
       Serial.println("connected");
-      // Once connected, publish an announcement...
-      client.publish("outTopic", "hello world");
-      // ... and resubscribe
-      client.subscribe("inTopic");
+      reconectarNosTopicos();
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
