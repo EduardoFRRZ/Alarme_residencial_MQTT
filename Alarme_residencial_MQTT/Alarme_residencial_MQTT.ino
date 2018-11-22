@@ -1,8 +1,14 @@
+//Programa : ALARME RESIDÊNCIAL MQTT
+//Autor : Eduardo Ferrarezi e Willian Agostini
+
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
 const char* ssid = "Btelway_Marines";
 const char* password = "agostini";
+//const char* ssid = "Net Virtua 577";
+//const char* password = "1000160930";
+
 const char* mqtt_server = "broker.mqtt-dashboard.com";
 
 const char* topico_alarme = "alarme";
@@ -13,19 +19,23 @@ long lastMsg = 0;
 char msg[50];
 int value = 0;
 
-int pinoRele = 15; //Pino ligado ao rele
-int pinoSensorPir = 13; // D7 nodeMcu
+//definição do pino de saída do sensor PIR HC (Sensor de presença) 
+#define PIN_SENSOR D4
 
-void setup() {
+//definição do pino de entrada do Buzzer
+#define PIN_BUZZER D1
 
-  pinMode(pinoRele, OUTPUT); //Define pino rele como saida
-  pinMode(pinoSensorPir, INPUT); //Define pino sensor como entrada
+int dado;
+ 
+void setup(){
+  //Definir os pinos como entrada ou saída de dados
+  pinMode(PIN_SENSOR, INPUT);
+  pinMode(PIN_BUZZER, OUTPUT);
 
   Serial.begin(115200);
   setup_wifi();
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
-
 }
 
 void loop() {
@@ -36,7 +46,7 @@ void loop() {
   client.loop();
 
   int acionamento = digitalRead(pinoSensorPir); //Le o valor do sensor PIR
-delay(500);
+  delay(500);
   Serial.println("sensor PIR");
   Serial.println(acionamento);
   if (acionamento == HIGH) //Sem movimento
@@ -48,6 +58,7 @@ delay(500);
   }
 
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void setup_wifi() {
 
