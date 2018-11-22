@@ -1,12 +1,11 @@
-//Programa : Sensor de presenca com modulo PIR
-//Autor : FILIPEFLOP
-
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
-const char* ssid = "........";
-const char* password = "........";
+const char* ssid = "Btelway_Marines";
+const char* password = "agostini";
 const char* mqtt_server = "broker.mqtt-dashboard.com";
+
+const char* topico_alarme = "alarme";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -14,12 +13,11 @@ long lastMsg = 0;
 char msg[50];
 int value = 0;
 
-int pinoRele = 13; //Pino ligado ao rele
-int acionamento; //Variavel para guardar valor do sensor
-int pinoSensorPir = 15;
- 
-void setup(){
-  
+int pinoRele = 15; //Pino ligado ao rele
+int pinoSensorPir = 13; // D7 nodeMcu
+
+void setup() {
+
   pinMode(pinoRele, OUTPUT); //Define pino rele como saida
   pinMode(pinoSensorPir, INPUT); //Define pino sensor como entrada
 
@@ -29,29 +27,26 @@ void setup(){
   client.setCallback(callback);
 
 }
- 
-void loop(){
-  
-  acionamento = digitalRead(pinoSensorPir); //Le o valor do sensor PIR
- 
-  if (acionamento == LOW) //Sem movimento, mantem rele desligado
-  {
-    digitalWrite(pinoRele, LOW);
-    Serial.println(acionamento);
-  }
-    else //Caso seja detectado um movimento, aciona o rele
-  {
-    digitalWrite(pinoRele, HIGH);
-    Serial.println(acionamento);
-  }
 
-  
+void loop() {
+
   if (!client.connected()) {
     reconnect();
   }
   client.loop();
 
-  
+  int acionamento = digitalRead(pinoSensorPir); //Le o valor do sensor PIR
+delay(500);
+  Serial.println("sensor PIR");
+  Serial.println(acionamento);
+  if (acionamento == HIGH) //Sem movimento
+  {
+    client.publish(topico_alarme, "alto");
+  }
+  else {
+    client.publish(topico_alarme, "baixo");
+  }
+
 }
 
 void setup_wifi() {
