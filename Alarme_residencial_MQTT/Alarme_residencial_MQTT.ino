@@ -22,6 +22,7 @@ int value = 0;
 #define PIN_LED D2 //definição do pino de entrada do LED
 
 const char* topico_alarme = "unoesc/alarme";
+const char* topico_buzzer = "unoesc/buzzer";
 const char* topico_led = "unoesc/led";
 
 void setup() {
@@ -89,12 +90,20 @@ void setup_wifi() {
 }
 
 void acaoLed(char payload) {
-  Serial.println("aqui");
   Serial.println(payload);
   if (payload == 1 || payload == '1') {
     digitalWrite(PIN_LED, HIGH);
   } else {
     digitalWrite(PIN_LED, LOW);
+  }
+}
+
+void acaoBuzzer(char payload) {
+  Serial.println(payload);
+  if (payload == 1 || payload == '1') {
+    digitalWrite(PIN_BUZZER, HIGH);
+  } else {
+    digitalWrite(PIN_BUZZER, LOW);
   }
 }
 
@@ -106,15 +115,17 @@ void callback(char* topic, byte* payload, unsigned int length) {
     Serial.print((char)payload[i]);
   }
   Serial.println();
-
+  
   if (String(topic) == String(topico_led))
     acaoLed((char)payload[0]);
+
+  if (String(topic) == String(topico_buzzer))
+    acaoBuzzer((char)payload[0]);
 }
 
 void reconectarNosTopicos() {
-  client.publish("outTopic", "hello world");
-  client.subscribe("inTopic");
-  client.subscribe(topico_led);
+  client.subscribe("unoesc/buzzer");
+  client.subscribe("unoesc/led");
 }
 
 void reconnect() {
