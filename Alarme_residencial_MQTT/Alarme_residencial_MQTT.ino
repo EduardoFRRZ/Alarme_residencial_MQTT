@@ -4,10 +4,14 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
-const char* ssid = "Btelway_Marines";
-const char* password = "agostini";
-//const char* ssid = "Net Virtua 577";
-//const char* password = "1000160930";
+//const char* ssid = "Unoesc";
+//const char* password = "";
+
+//const char* ssid = "Btelway_Marines";
+//const char* password = "agostini";
+
+const char* ssid = "Net Virtua 577";
+const char* password = "1000160930";
 
 const char* mqtt_server = "broker.mqtt-dashboard.com";
 
@@ -17,19 +21,35 @@ long lastMsg = 0;
 char msg[50];
 int value = 0;
 
-#define PIN_SENSOR D4 //definição do pino de saída do sensor PIR HC (Sensor de presença)
 #define PIN_BUZZER D1 //definição do pino de entrada do Buzzer
 #define PIN_LED D2 //definição do pino de entrada do LED
+#define PIN_RELE D3 //definição do pino de entrada do Relé
+#define PIN_SENSOR D4 //definição do pino de saída do sensor PIR HC (Sensor de presença)
 
-const char* topico_alarme = "unoesc/alarme";
-const char* topico_buzzer = "unoesc/buzzer";
-const char* topico_led = "unoesc/led";
+// NodeMCU 1
+const char* topico_alarme_1 = "unoesc/alarme_1";
+const char* topico_buzzer_1 = "unoesc/buzzer_1";
+const char* topico_led_1 = "unoesc/led_1";
+const char* topico_trancar_1 = "unoesc/trancar_1";
+
+// NodeMCU 2
+const char* topico_alarme_2 = "unoesc/alarme_2";
+const char* topico_buzzer_2 = "unoesc/buzzer_2";
+const char* topico_led_2 = "unoesc/led_2";
+const char* topico_trancar_2 = "unoesc/trancar_2";
+
+// NodeMCU 3
+const char* topico_alarme_3 = "unoesc/alarme_3";
+const char* topico_buzzer_3 = "unoesc/buzzer_3";
+const char* topico_led_3 = "unoesc/led_3";
+const char* topico_trancar_3 = "unoesc/trancar_3";
 
 void setup() {
   //Definir os pinos como entrada ou saída de dados
   pinMode(PIN_SENSOR, INPUT);
   pinMode(PIN_BUZZER, OUTPUT);
   pinMode(PIN_LED, OUTPUT);
+  pinMode(PIN_RELE, OUTPUT);
 
   Serial.begin(115200);
   setup_wifi();
@@ -38,16 +58,18 @@ void setup() {
 }
 
 void loop() {
-
-  if (!client.connected()) {
+  if (!client.connected())
     reconnect();
-  }
+    
   client.loop();
 
   long now = millis();
   if (millis() - lastMsg > 1000) {
     lastMsg = now;
-    veriricarSensorPIR();
+    
+    leMeuSensorPresenca();
+    escutaSensoresPresenca(); // Escuta os sensores das outras NodeMCU
+    
     // snprintf (msg, 50, "hello world #%ld", value);
     client.publish("outTopic", msg);
   }
@@ -55,16 +77,23 @@ void loop() {
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void veriricarSensorPIR() {
-  int acionamento = digitalRead(PIN_SENSOR); //Le o valor do sensor PIR
-  //  Serial.println("sensor PIR");
-  //  Serial.println(acionamento);
+void escutaSensoresPresenca(){
+  bool statusSensor_2 = (client.subscribe(topico_alarme_2));
+  bool statusSensor_3 = (client.subscribe(topico_alarme_3));
 
-  snprintf (msg, 50, "%ld", acionamento);
+  if((statusSensor_2 != false) || (statusSensor_3 != false))
+    acaoBuzzer('1');
+  else
+    acaoBuzzer('0');
+}
 
-  client.publish(topico_alarme, msg);
-
-  //if (acionamento == HIGH) //Sem movimento
+void leMeuSensorPresenca() {
+  int dados = digitalRead(PIN_SENSOR); //Le o valor do sensor de presença
+  snprintf (msg, 50, "%ld", dados);
+  Serial.println(dados);
+  client.publish(topico_alarme_1, msg);
+  delay(100);
+  //if (dados == HIGH) //Sem movimento
 }
 
 void setup_wifi() {
@@ -116,16 +145,16 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
   Serial.println();
   
-  if (String(topic) == String(topico_led))
+  if (String(topic) == String(topico_led_1))
     acaoLed((char)payload[0]);
 
-  if (String(topic) == String(topico_buzzer))
+  if (String(topic) == String(topico_buzzer_1))
     acaoBuzzer((char)payload[0]);
 }
 
 void reconectarNosTopicos() {
-  client.subscribe("unoesc/buzzer");
-  client.subscribe("unoesc/led");
+  client.subscribe("unoesc/buzzer_1");
+  client.subscribe("unoesc/led_1");
 }
 
 void reconnect() {
