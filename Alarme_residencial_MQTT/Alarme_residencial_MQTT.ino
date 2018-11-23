@@ -18,8 +18,6 @@ const char* mqtt_server = "iot.eclipse.org";
 WiFiClient espClient;
 PubSubClient client(espClient);
 long lastMsg = 0;
-char msg[50];
-int value = 0;
 
 bool alarme_ativado = false;
 
@@ -27,7 +25,7 @@ bool alarme_ativado = false;
 #define PIN_LED D2 //definição do pino de entrada do LED
 #define PIN_RELE D3 //definição do pino de entrada do Relé
 #define PIN_SENSOR D4 //definição do pino de saída do sensor PIR HC (Sensor de presença)
-#define NODEMCU 3
+#define NODEMCU 1
 
 #if NODEMCU == 1
 const char* topico_led = "unoesc/led_1";
@@ -47,7 +45,7 @@ const char* topico_trancar = "unoesc/trancar_3";
 #endif
 
 const char* topico_buzzer = "unoesc/buzzer";
-const char* topico_alarme_ativar = "unoesc/alarmeativado";
+const char* topico_ativar_alarme = "unoesc/ativar_alarme";
 
 
 void setup() {
@@ -68,29 +66,74 @@ void loop() {
     reconnect();
 
   client.loop();
+  leMeuSensorPresenca();
+}
 
+void leMeuSensorPresenca() {
   long now = millis();
   if (millis() - lastMsg > 1000) {
     lastMsg = now;
+    char msg[10];
+    int dado = digitalRead(PIN_SENSOR); //Le o valor do sensor de presença
+    snprintf (msg, 10, "%ld", dado);
+    //Serial.print("PIR ");
+    //Serial.println(dado);
+    client.publish(topico_sensor, msg);
 
-    leMeuSensorPresenca();
-    // snprintf (msg, 50, "hello world #%ld", value);
-
+    if (alarme_ativado && dado == HIGH)
+      client.publish(topico_buzzer, msg);
   }
+}
+
+void callback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Message arrived [");
+  Serial.print(topic);
+  Serial.print("] ");
+  for (int i = 0; i < length; i++) {
+    Serial.print((char)payload[i]);
+  }
+  Serial.println();
+
+  if (String(topic) == String(topico_led))
+    acaoLed((char)payload[0]);
+
+  if (String(topic) == String(topico_buzzer))
+    acaoBuzzer((char)payload[0]);
+
+  if (String(topic) == String(topico_ativar_alarme))
+    acaoAtivarAlarme((char)payload[0]);
+
+  if (String(topic) == String(topico_trancar))
+    acaoTrancar((char)payload[0]);
 
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void reconectarNosTopicos() {
+  //client.subscribe("unoesc/#");
+  client.subscribe(topico_led);
+  client.subscribe(topico_trancar);
+  client.subscribe(topico_buzzer);
+  client.subscribe(topico_ativar_alarme);
+}
 
-void leMeuSensorPresenca() {
-  if (!alarme_ativado)
-    return;
+void acaoLed(char payload) {
+  digitalWrite(PIN_LED, (payload == 1 || payload == '1') );
+}
 
-  int dados = digitalRead(PIN_SENSOR); //Le o valor do sensor de presença
-  snprintf (msg, 50, "%ld", dados);
-  Serial.println(dados);
-  client.publish(topico_sensor, msg);
-  client.publish(topico_buzzer, msg);
+void acaoBuzzer(char payload) {
+  digitalWrite(PIN_BUZZER, (payload == 1 || payload == '1') );
+}
+
+void acaoAtivarAlarme (char payload) {
+  alarme_ativado = (payload == 1 || payload == '1');
+  client.publish(topico_buzzer, "0");
+
+  if (alarme_ativado)
+    client.publish(topico_trancar, "1");
+}
+
+void acaoTrancar(char payload) {
+  digitalWrite(PIN_RELE, (payload == 1 || payload == '1') );
 }
 
 void setup_wifi() {
@@ -115,62 +158,11 @@ void setup_wifi() {
   Serial.println(WiFi.localIP());
 }
 
-void acaoLed(char payload) {
-  digitalWrite(PIN_LED, (payload == 1 || payload == '1') );
-}
-
-void acaoBuzzer(char payload) {
-  digitalWrite(PIN_BUZZER, (payload == 1 || payload == '1') );
-}
-
-void acaoAtivarAlarme (char payload) {
-  alarme_ativado = (payload == 1 || payload == '1');
-  if (!alarme_ativado)
-    digitalWrite(PIN_BUZZER, LOW );
-}
-
-void acaoTrancar(char payload) {
-  digitalWrite(PIN_RELE, (payload == 1 || payload == '1') );
-}
-
-void callback(char* topic, byte* payload, unsigned int length) {
-  Serial.print("Message arrived [");
-  Serial.print(topic);
-  Serial.print("] ");
-  for (int i = 0; i < length; i++) {
-    Serial.print((char)payload[i]);
-  }
-  Serial.println();
-
-  if (String(topic) == String(topico_led))
-    acaoLed((char)payload[0]);
-
-  if (String(topic) == String(topico_buzzer))
-    acaoBuzzer((char)payload[0]);
-
-  if (String(topic) == String(topico_alarme_ativar))
-    acaoAtivarAlarme((char)payload[0]);
-
-  if (String(topic) == String(topico_trancar))
-    acaoTrancar((char)payload[0]);
-
-}
-
-void reconectarNosTopicos() {
-
-  client.subscribe("unoesc/#");
-  //client.subscribe(topico_buzzer);
-
-}
-
 void reconnect() {
-  // Loop until we're reconnected
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
-    // Create a random client ID
     String clientId = "ESP8266Client-";
     clientId += String(random(0xffff), HEX);
-    // Attempt to connect
     if (client.connect(clientId.c_str())) {
       Serial.println("connected");
       reconectarNosTopicos();
@@ -178,7 +170,6 @@ void reconnect() {
       Serial.print("failed, rc=");
       Serial.print(client.state());
       Serial.println(" try again in 5 seconds");
-      // Wait 5 seconds before retrying
       delay(5000);
     }
   }
