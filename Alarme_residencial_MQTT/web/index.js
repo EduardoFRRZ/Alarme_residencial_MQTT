@@ -5,6 +5,8 @@
 
 // connect the client
 var client;
+var clientes_ativos_tempo = []
+var clientes_ativos = [null, null, null]
 
 function onConnect() {
   console.log("conectado");
@@ -58,7 +60,7 @@ function alterar_badge_sensor_alarme(elementoId, payload) {
 }
 
 function alterar_badge_buzzer(elementoId, payload) {
-  alterar_badge(elementoId, payload, "badge-danger","badge-primary")
+  alterar_badge(elementoId, payload, "badge-danger", "badge-primary")
 }
 
 // called when a message arrives
@@ -95,6 +97,18 @@ function onMessageArrived(message) {
   if (message.destinationName == "unoesc/buzzer")
     alterar_badge_buzzer("status_buzzer", message.payloadString)
 
+  verificarAtividade(message.destinationName)
+}
+
+function verificarAtividade(topico) {
+  if (topico.includes('sensor_1'))
+    clientes_ativos_tempo[0] = new Date().getSeconds()
+
+  if (topico.includes('sensor_2'))
+    clientes_ativos_tempo[1] = new Date().getSeconds()
+
+  if (topico.includes('sensor_3'))
+    clientes_ativos_tempo[2] = new Date().getSeconds()
 }
 
 function onConnectionLost(responseObject) {
@@ -121,4 +135,38 @@ window.onload = () => {
 
   // conectar automaticamente
   connect();
+
+  setInterval(alertFunc, 4000);
+
+}
+
+function alertFunc() {
+
+  for (let index = 0; index < 3; index++) {
+    clientes_ativos[index] = (clientes_ativos_tempo[index] != null)
+    clientes_ativos_tempo[index] == null
+  }
+
+  for (let index = 0; index < 3; index++) {
+    var texto = "onn"
+    if (clientes_ativos[index] == false)
+      texto = "offline"
+
+
+    if (index == 0)
+      document.getElementById("online1").innerText = texto
+
+    if (index == 1)
+      document.getElementById("online2").innerText = texto
+
+    if (index == 2)
+      document.getElementById("online3").innerText = texto
+
+  }
+
+
+
+
+  console.log(clientes_ativos)
+  console.log(clientes_ativos_tempo)
 }
