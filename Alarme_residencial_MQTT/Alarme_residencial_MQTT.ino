@@ -10,8 +10,8 @@
 const char* ssid = "Btelway_Marines";
 const char* password = "agostini";
 
-//const char* ssid = "Net Virtua 577";
-//const char* password = "1000160930";
+const char* ssid = "Net Virtua 577";
+const char* password = "1000160930";
 
 const char* mqtt_server = "test.mosquitto.org";
 
