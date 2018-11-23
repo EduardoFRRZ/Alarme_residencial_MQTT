@@ -77,11 +77,16 @@ void leMeuSensorPresenca() {
     int dado = digitalRead(PIN_SENSOR); //Le o valor do sensor de presença
     snprintf (msg, 10, "%ld", dado);
     //Serial.print("PIR ");
-    //Serial.println(dado);
+    Serial.println(dado);
     client.publish(topico_sensor, msg);
 
-    if (alarme_ativado && dado == HIGH)
+    if ((alarme_ativado) && (dado == HIGH)){
       client.publish(topico_buzzer, msg);
+      digitalWrite(D1, HIGH);
+    }
+    if((!alarme_ativado) && (!dado == HIGH)){
+      digitalWrite(D1, LOW);
+    }
   }
 }
 
@@ -133,7 +138,7 @@ void acaoAtivarAlarme (char payload) {
 }
 
 void acaoTrancar(char payload) {
-  digitalWrite(PIN_RELE, (payload == 1 || payload == '1') );
+  digitalWrite(PIN_RELE, (payload == 0 || payload == '0') );
 }
 
 void setup_wifi() {

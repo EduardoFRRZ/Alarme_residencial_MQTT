@@ -50,7 +50,7 @@ function alterar_badge(elementoId, payload, classTrue, classFalse) {
 }
 
 function alterar_badge_led(elementoId, payload) {
-  alterar_badge(elementoId, payload, "badge-success", "badge-light")
+  alterar_badge(elementoId, payload, "badge-success", "badge-danger")
 }
 
 function alterar_badge_sensor_alarme(elementoId, payload) {
