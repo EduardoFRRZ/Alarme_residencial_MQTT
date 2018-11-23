@@ -35,14 +35,10 @@ function subscribe() {
   adicionarTopicoHtml(topic, qos);
 }
 
-function publish() {
-  let pub = document.getElementById('enviar');
-  console.log(pub)
-  let topic = pub.topico.value;
-  let text = pub.mensagem.value;
-
-  let message = new Paho.MQTT.Message(text);
-  message.destinationName = topic;
+function publish(topico, payload) {
+  console.log(topico,payload)
+  let message = new Paho.MQTT.Message(payload);
+  message.destinationName = topico;
   message.qos = Number(2);
   message.retained = true;
   client.send(message);
@@ -103,10 +99,7 @@ function salvarConfigAtuais() {
   let conexao = document.getElementById('conexao');
   let host = conexao.host.value;
   let port = conexao.port.value;
-  let topicSub = document.getElementById('escutar').topico.value;
-  let topicPub = document.getElementById('enviar').topico.value;
-  let mensagem = document.getElementById('enviar').mensagem.value;
-  let obj = { host: host, port: port, topicSub: topicSub, topicPub: topicPub, mensagem: mensagem };
+  let obj = { host: host, port: port};
   localStorage.setItem('conexao', JSON.stringify(obj));
 }
 
@@ -117,9 +110,6 @@ window.onload = () => {
     let conexao = document.getElementById('conexao');
     conexao.host.value = conexaoSalva.host + '';
     conexao.port.value = conexaoSalva.port+ '';
-    document.getElementById('escutar').topico.value = conexaoSalva.topicSub + '';
-    document.getElementById('enviar').topico.value = conexaoSalva.topicPub+ '';
-    document.getElementById('enviar').mensagem.value = conexaoSalva.mensagem+ '';
   }
 
   // conectar automaticamente
