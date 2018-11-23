@@ -9,7 +9,12 @@ var client;
 function onConnect() {
   console.log("conectado");
   client.subscribe('unoesc/led_1', { qos: Number(2) });
-  client.subscribe('unoesc/trancar_1', { qos: Number(2) });  
+  client.subscribe('unoesc/trancar_1', { qos: Number(2) });
+  client.subscribe('unoesc/led_2', { qos: Number(2) });
+  client.subscribe('unoesc/trancar_2', { qos: Number(2) });
+  client.subscribe('unoesc/led_3', { qos: Number(2) });
+  client.subscribe('unoesc/trancar_3', { qos: Number(2) });
+  
 }
 // called when the client connects
 function connect() {
@@ -47,24 +52,34 @@ function publish(topico, payload) {
   client.send(message);
 }
 
+
+function alterar_badge(elementoId, payload) {
+  let span = document.getElementById(elementoId)
+  if (payload == 0)
+    span.className = "badge badge-pill badge-light"
+  else
+    span.className = "badge badge-pill badge-success"
+}
 // called when a message arrives
 function onMessageArrived(message) {
-console.log(message.destinationName)
-  if (message.destinationName == "unoesc/led_1") {
-    let span = document.getElementById("spanled1")
-    if (message.payloadString == 0)
-      span.className = "badge badge-pill badge-light"
-    else
-      span.className = "badge badge-pill badge-success"
-    }
 
-  if (message.destinationName == "unoesc/trancar_1") {
-    let span = document.getElementById("spantranca1")
-    if (message.payloadString == 0)
-      span.className = "badge badge-pill badge-light"
-    else
-      span.className = "badge badge-pill badge-success"
-  }
+  if (message.destinationName == "unoesc/led_1")
+    alterar_badge("spanled1", message.payloadString)
+
+  if (message.destinationName == "unoesc/trancar_1")
+    alterar_badge("spantranca1", message.payloadString)
+
+  if (message.destinationName == "unoesc/led_2")
+    alterar_badge("spanled2", message.payloadString)
+
+  if (message.destinationName == "unoesc/trancar_2")
+    alterar_badge("spantranca2", message.payloadString)
+
+  if (message.destinationName == "unoesc/led_3")
+    alterar_badge("spanled3", message.payloadString)
+
+  if (message.destinationName == "unoesc/trancar_3")
+    alterar_badge("spantranca3", message.payloadString)
 
 }
 
@@ -72,15 +87,6 @@ console.log(message.destinationName)
 function onConnectionLost(responseObject) {
   if (responseObject.errorCode !== 0)
     console.log("onConnectionLost:" + responseObject.errorMessage);
-}
-
-function adicionarTopicoHtml(topic, qos) {
-  document.getElementById('topicosInscritos').innerHTML +=
-    ` <tr>
-					<th scope="row">${document.getElementById('topicosInscritos').rows.length + 1} </th>
-					<td>${topic}</td>
-					<td>${qos}</td>
-			</tr>`;
 }
 
 function salvarConfigAtuais() {

@@ -76,27 +76,77 @@
 						<button class="btn btn-danger btn-block" onclick="publish('unoesc/trancar_1','0')"> Fechar </button>
 					</div>
 				</div>
-			</div>
-
-			<div class="col-sm">
-				<h3 align="center">Cômodo 2</h3>
-				<hr>
-				<button type="Abrir" class="btn btn-success btn-block" onclick="publish('unoesc/led_2','1')"> ... Abrir ...
-				</button><br><br>
-				<button type="Fechar" class="btn btn-danger btn-block" onclick="publish('unoesc/led_2','0')"> ... Fechar ...
-				</button>
-			</div>
-
-			<div class="col-sm">
-				<h3 align="center">Cômodo 3</h3>
-				<hr>
-				<button type="Abrir" class="btn btn-success btn-block" onclick="publish('unoesc/led_3','1')"> ... Abrir ...
-				</button><br><br>
-				<button type="Fechar" class="btn btn-danger btn-block" onclick="publish('unoesc/led_3','0')"> ... Fechar ...
-				</button>
-			</div>
+			
 		</div>
 
+		<div class="col-sm">
+
+				<h3>Cômodo 2</h3>
+				<hr>
+				
+
+				<br>
+				<div class="row">
+						<div class="col-sm">
+							<span id="spanled2" class="badge badge-pill badge-light">Led</span>
+						</div>
+						<div class="col-sm">
+							<button class="btn btn-success btn-block" onclick="publish('unoesc/led_2','1')"> Ligar </button>
+						</div>
+						<div class="col-sm">
+							<button class="btn btn-danger btn-block" onclick="publish('unoesc/led_2','0')"> Desligar </button>
+						</div>
+					</div>
+					<br>
+				<div class="row">
+					<div class="col-sm">
+						<span id="spantranca2" class="badge badge-pill badge-light">Tranca</span>
+					</div>
+					<div class="col-sm">
+						<button class="btn btn-success btn-block" onclick="publish('unoesc/trancar_2','1')"> Abrir </button>
+					</div>
+					<div class="col-sm">
+						<button class="btn btn-danger btn-block" onclick="publish('unoesc/trancar_2','0')"> Fechar </button>
+					</div>
+				</div>
+			
+		</div>
+
+		<div class="col-sm">
+
+				<h3>Cômodo 3</h3>
+				<hr>
+				
+
+				<br>
+				<div class="row">
+						<div class="col-sm">
+							<span id="spanled3" class="badge badge-pill badge-light">Led</span>
+						</div>
+						<div class="col-sm">
+							<button class="btn btn-success btn-block" onclick="publish('unoesc/led_3','1')"> Ligar </button>
+						</div>
+						<div class="col-sm">
+							<button class="btn btn-danger btn-block" onclick="publish('unoesc/led_3','0')"> Desligar </button>
+						</div>
+					</div>
+					<br>
+				<div class="row">
+					<div class="col-sm">
+						<span id="spantranca3" class="badge badge-pill badge-light">Tranca</span>
+					</div>
+					<div class="col-sm">
+						<button class="btn btn-success btn-block" onclick="publish('unoesc/trancar_3','1')"> Abrir </button>
+					</div>
+					<div class="col-sm">
+						<button class="btn btn-danger btn-block" onclick="publish('unoesc/trancar_3','0')"> Fechar </button>
+					</div>
+				</div>
+			
+		</div>
+
+
+	</div>
 		<div class="row padding">
 
 			<div class="col-sm">
