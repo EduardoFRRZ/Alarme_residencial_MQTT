@@ -25,7 +25,7 @@ bool alarme_ativado = false;
 #define PIN_LED D2 //definição do pino de entrada do LED
 #define PIN_RELE D3 //definição do pino de entrada do Relé
 #define PIN_SENSOR D4 //definição do pino de saída do sensor PIR HC (Sensor de presença)
-#define NODEMCU 2
+#define NODEMCU 3
 
 #if NODEMCU == 1
 const char* topico_led = "unoesc/led_1";
@@ -138,7 +138,7 @@ void acaoAtivarAlarme (char payload) {
 }
 
 void acaoTrancar(char payload) {
-  digitalWrite(PIN_RELE, (payload == 0 || payload == '0') );
+  digitalWrite(PIN_RELE, (payload == 1 || payload == '1') );
 }
 
 void setup_wifi() {
