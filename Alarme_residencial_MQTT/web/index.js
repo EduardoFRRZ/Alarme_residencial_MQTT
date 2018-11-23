@@ -8,6 +8,8 @@ var client;
 
 function onConnect() {
   console.log("conectado");
+  client.subscribe('unoesc/led_1', { qos: Number(2) });
+  client.subscribe('unoesc/trancar_1', { qos: Number(2) });  
 }
 // called when the client connects
 function connect() {
@@ -15,12 +17,13 @@ function connect() {
   let conexao = document.getElementById('conexao');
   let broker = conexao.host.value;
   let port = conexao.port.value;
-  console.log({broker:broker,port:port});
+  console.log({ broker: broker, port: port });
 
   client = new Paho.MQTT.Client(broker, Number(port), "Arduino##@!W");
   client.connect({ onSuccess: onConnect });
   client.onConnectionLost = onConnectionLost;
   client.onMessageArrived = onMessageArrived;
+
 
 }
 
@@ -36,7 +39,7 @@ function subscribe() {
 }
 
 function publish(topico, payload) {
-  console.log(topico,payload)
+  console.log(topico, payload)
   let message = new Paho.MQTT.Message(payload);
   message.destinationName = topico;
   message.qos = Number(2);
@@ -46,44 +49,29 @@ function publish(topico, payload) {
 
 // called when a message arrives
 function onMessageArrived(message) {
-  console.log("onMessageArrived:" + message.payloadString);
-  subscribeAddHtml(message);
-}
+console.log(message.destinationName)
+  if (message.destinationName == "unoesc/led_1") {
+    let span = document.getElementById("spanled1")
+    if (message.payloadString == 0)
+      span.className = "badge badge-pill badge-light"
+    else
+      span.className = "badge badge-pill badge-success"
+    }
 
-function unsubscribe() {
-  var topic = document.getElementById("subscribeTopicInput").value;
-  console.log("INFO", "Unsubscribing: [Topic: ", topic, "]");
-  client.unsubscribe(topic, {
-    onSuccess: unsubscribeSuccess,
-    onFailure: unsubscribeFailure,
-    invocationContext: { topic: topic }
-  });
+  if (message.destinationName == "unoesc/trancar_1") {
+    let span = document.getElementById("spantranca1")
+    if (message.payloadString == 0)
+      span.className = "badge badge-pill badge-light"
+    else
+      span.className = "badge badge-pill badge-success"
+  }
+
 }
 
 // called when the client loses its connection
 function onConnectionLost(responseObject) {
   if (responseObject.errorCode !== 0)
     console.log("onConnectionLost:" + responseObject.errorMessage);
-}
-
-function unsubscribeSuccess(context) {
-  console.log("INFO", "Unsubscribed. [Topic: ", context.invocationContext.topic, "]");
-}
-
-function unsubscribeFailure(context) {
-  console.log("ERROR", "Failed to unsubscribe. [Topic: ", context.invocationContext.topic, ", Error: ", context.errorMessage, "]");
-}
-
-function subscribeAddHtml(mensagem) {
-
-  document.getElementById('tabelaSubscribe').innerHTML +=
-    ` <tr>
-					<th scope="row">${document.getElementById('tabelaSubscribe').rows.length + 1} </th>
-					<td>${mensagem.destinationName}</td>
-					<td>${mensagem.payloadString}</td>
-					<td>${mensagem.qos}</td>
-			</tr>`;
-
 }
 
 function adicionarTopicoHtml(topic, qos) {
@@ -99,7 +87,7 @@ function salvarConfigAtuais() {
   let conexao = document.getElementById('conexao');
   let host = conexao.host.value;
   let port = conexao.port.value;
-  let obj = { host: host, port: port};
+  let obj = { host: host, port: port };
   localStorage.setItem('conexao', JSON.stringify(obj));
 }
 
@@ -109,7 +97,7 @@ window.onload = () => {
     conexaoSalva = JSON.parse(conexaoSalva);
     let conexao = document.getElementById('conexao');
     conexao.host.value = conexaoSalva.host + '';
-    conexao.port.value = conexaoSalva.port+ '';
+    conexao.port.value = conexaoSalva.port + '';
   }
 
   // conectar automaticamente
