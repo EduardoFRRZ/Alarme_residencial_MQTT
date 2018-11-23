@@ -1,19 +1,19 @@
-//Programa : ALARME RESIDÊNCIAL MQTT
+//Programa : sensor RESIDÊNCIAL MQTT
 //Autor : Eduardo Ferrarezi e Willian Agostini
 
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
-//const char* ssid = "Unoesc";
-//const char* password = "";
+const char* ssid = "Unoesc";
+const char* password = "";
 
 //const char* ssid = "Btelway_Marines";
 //const char* password = "agostini";
 
-const char* ssid = "Net Virtua 577";
-const char* password = "1000160930";
+//const char* ssid = "Net Virtua 577";
+//const char* password = "1000160930";
 
-const char* mqtt_server = "broker.mqtt-dashboard.com";
+const char* mqtt_server = "iot.eclipse.org";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -21,28 +21,34 @@ long lastMsg = 0;
 char msg[50];
 int value = 0;
 
+bool alarme_ativado = false;
+
 #define PIN_BUZZER D1 //definição do pino de entrada do Buzzer
 #define PIN_LED D2 //definição do pino de entrada do LED
 #define PIN_RELE D3 //definição do pino de entrada do Relé
 #define PIN_SENSOR D4 //definição do pino de saída do sensor PIR HC (Sensor de presença)
+#define NODEMCU 3
 
-// NodeMCU 1
-const char* topico_alarme_1 = "unoesc/alarme_1";
-const char* topico_buzzer_1 = "unoesc/buzzer_1";
-const char* topico_led_1 = "unoesc/led_1";
-const char* topico_trancar_1 = "unoesc/trancar_1";
+#if NODEMCU == 1
+const char* topico_led = "unoesc/led_1";
+const char* topico_sensor = "unoesc/sensor_1";
+const char* topico_trancar = "unoesc/trancar_1";
 
-// NodeMCU 2
-const char* topico_alarme_2 = "unoesc/alarme_2";
-const char* topico_buzzer_2 = "unoesc/buzzer_2";
-const char* topico_led_2 = "unoesc/led_2";
-const char* topico_trancar_2 = "unoesc/trancar_2";
+#elif NODEMCU == 2
+const char* topico_led = "unoesc/led_2";
+const char* topico_sensor = "unoesc/sensor_2";
+const char* topico_trancar = "unoesc/trancar_2";
 
-// NodeMCU 3
-const char* topico_alarme_3 = "unoesc/alarme_3";
-const char* topico_buzzer_3 = "unoesc/buzzer_3";
-const char* topico_led_3 = "unoesc/led_3";
-const char* topico_trancar_3 = "unoesc/trancar_3";
+#elif NODEMCU == 3 //apenas buzzer
+const char* topico_led = "unoesc/led_3";
+const char* topico_sensor = "unoesc/sensor_3";
+const char* topico_trancar = "unoesc/trancar_3";
+
+#endif
+
+const char* topico_buzzer = "unoesc/buzzer";
+const char* topico_alarme_ativar = "unoesc/alarmeativado";
+
 
 void setup() {
   //Definir os pinos como entrada ou saída de dados
@@ -60,40 +66,31 @@ void setup() {
 void loop() {
   if (!client.connected())
     reconnect();
-    
+
   client.loop();
 
   long now = millis();
   if (millis() - lastMsg > 1000) {
     lastMsg = now;
-    
+
     leMeuSensorPresenca();
-    escutaSensoresPresenca(); // Escuta os sensores das outras NodeMCU
-    
     // snprintf (msg, 50, "hello world #%ld", value);
-    client.publish("outTopic", msg);
+
   }
 
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void escutaSensoresPresenca(){
-  bool statusSensor_2 = (client.subscribe(topico_alarme_2));
-  bool statusSensor_3 = (client.subscribe(topico_alarme_3));
-
-  if((statusSensor_2 != false) || (statusSensor_3 != false))
-    acaoBuzzer('1');
-  else
-    acaoBuzzer('0');
-}
 
 void leMeuSensorPresenca() {
+  if (!alarme_ativado)
+    return;
+
   int dados = digitalRead(PIN_SENSOR); //Le o valor do sensor de presença
   snprintf (msg, 50, "%ld", dados);
   Serial.println(dados);
-  client.publish(topico_alarme_1, msg);
-  delay(100);
-  //if (dados == HIGH) //Sem movimento
+  client.publish(topico_sensor, msg);
+  client.publish(topico_buzzer, msg);
 }
 
 void setup_wifi() {
@@ -119,21 +116,21 @@ void setup_wifi() {
 }
 
 void acaoLed(char payload) {
-  Serial.println(payload);
-  if (payload == 1 || payload == '1') {
-    digitalWrite(PIN_LED, HIGH);
-  } else {
-    digitalWrite(PIN_LED, LOW);
-  }
+  digitalWrite(PIN_LED, (payload == 1 || payload == '1') );
 }
 
 void acaoBuzzer(char payload) {
-  Serial.println(payload);
-  if (payload == 1 || payload == '1') {
-    digitalWrite(PIN_BUZZER, HIGH);
-  } else {
-    digitalWrite(PIN_BUZZER, LOW);
-  }
+  digitalWrite(PIN_BUZZER, (payload == 1 || payload == '1') );
+}
+
+void acaoAtivarAlarme (char payload) {
+  alarme_ativado = (payload == 1 || payload == '1');
+  if (!alarme_ativado)
+    digitalWrite(PIN_BUZZER, LOW );
+}
+
+void acaoTrancar(char payload) {
+  digitalWrite(PIN_RELE, (payload == 1 || payload == '1') );
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {
@@ -144,17 +141,26 @@ void callback(char* topic, byte* payload, unsigned int length) {
     Serial.print((char)payload[i]);
   }
   Serial.println();
-  
-  if (String(topic) == String(topico_led_1))
+
+  if (String(topic) == String(topico_led))
     acaoLed((char)payload[0]);
 
-  if (String(topic) == String(topico_buzzer_1))
+  if (String(topic) == String(topico_buzzer))
     acaoBuzzer((char)payload[0]);
+
+  if (String(topic) == String(topico_alarme_ativar))
+    acaoAtivarAlarme((char)payload[0]);
+
+  if (String(topic) == String(topico_trancar))
+    acaoTrancar((char)payload[0]);
+
 }
 
 void reconectarNosTopicos() {
-  client.subscribe("unoesc/buzzer_1");
-  client.subscribe("unoesc/led_1");
+
+  client.subscribe("unoesc/#");
+  //client.subscribe(topico_buzzer);
+
 }
 
 void reconnect() {
