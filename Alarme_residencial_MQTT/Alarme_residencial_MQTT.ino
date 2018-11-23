@@ -4,16 +4,16 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
-const char* ssid = "Unoesc";
-const char* password = "";
+//const char* ssid = "Unoesc";
+//const char* password = "";
 
 //const char* ssid = "Btelway_Marines";
 //const char* password = "agostini";
 
-//const char* ssid = "Net Virtua 577";
-//const char* password = "1000160930";
+const char* ssid = "Net Virtua 577";
+const char* password = "1000160930";
 
-const char* mqtt_server = "iot.eclipse.org";
+const char* mqtt_server = "test.mosquitto.org";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
