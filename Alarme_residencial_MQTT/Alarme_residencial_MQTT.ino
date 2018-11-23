@@ -4,16 +4,16 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
-const char* ssid = "Unoesc";
-const char* password = "";
+//const char* ssid = "Unoesc";
+//const char* password = "";
 
-//const char* ssid = "Btelway_Marines";
-//const char* password = "agostini";
+const char* ssid = "Btelway_Marines";
+const char* password = "agostini";
 
 //const char* ssid = "Net Virtua 577";
 //const char* password = "1000160930";
 
-const char* mqtt_server = "iot.eclipse.org";
+const char* mqtt_server = "test.mosquitto.org";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -25,7 +25,7 @@ bool alarme_ativado = false;
 #define PIN_LED D2 //definição do pino de entrada do LED
 #define PIN_RELE D3 //definição do pino de entrada do Relé
 #define PIN_SENSOR D4 //definição do pino de saída do sensor PIR HC (Sensor de presença)
-#define NODEMCU 1
+#define NODEMCU 2
 
 #if NODEMCU == 1
 const char* topico_led = "unoesc/led_1";
