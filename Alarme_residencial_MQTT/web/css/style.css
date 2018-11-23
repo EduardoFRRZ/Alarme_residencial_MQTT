@@ -1,0 +1,25 @@
+.container{
+	margin: 50px;
+	padding: 50px;
+	background-color: white;
+}
+
+.padding{
+	padding-top: 50px;
+}
+
+.borda_texto{
+    -webkit-text-stroke-width: 2px;
+    -webkit-text-stroke-color: #000;
+    font-size: 3em; color: #FFFFFF;
+}
+
+form{
+	border-width: 5px;
+	border-style: solid;
+	padding: 20px;
+}
+
+h3{
+	text-align: center;
+}
