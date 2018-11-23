@@ -36,10 +36,10 @@
 
 			<div class="row">
 				<div class="col">
-					<br><button type="button" class="btn btn-info btn-lg btn-block" onclick="connect()"> ... Conectar ... </button><br>
+					<br><button type="button" class="btn btn-info btn-block" onclick="connect()"> ... Conectar ... </button><br>
 				</div>
 				<div class="col">
-					<br><button type="button" class="btn btn-dark btn-lg btn-block" onclick="salvarConfigAtuais()"> ... Salvar ... </button><br>
+					<br><button type="button" class="btn btn-dark btn-block" onclick="salvarConfigAtuais()"> ... Salvar ... </button><br>
 				</div>
 			</div>
 		</form>
@@ -48,24 +48,52 @@
 
 			<div class="col-sm">
 
-				<h3 align="center">Cômodo 1</h3>
+				<h3>Cômodo 1</h3>
 				<hr>
-					<button class="btn btn-success btn-lg btn-block" onclick="publish('unoesc/led_1','1')"> ... Abrir ... </button><br><br>
-					<button class="btn btn-danger btn-lg btn-block" onclick="publish('unoesc/led_1','0')"> ... Fechar ... </button>
+				
+
+				<br>
+				<div class="row">
+						<div class="col-sm">
+							<span class="badge badge-pill badge-light">Led</span>
+						</div>
+						<div class="col-sm">
+							<button class="btn btn-success btn-block" onclick="publish('unoesc/led_1','1')"> Ligar </button>
+						</div>
+						<div class="col-sm">
+							<button class="btn btn-danger btn-block" onclick="publish('unoesc/led_1','0')"> Desligar </button>
+						</div>
+					</div>
+					<br>
+				<div class="row">
+					<div class="col-sm">
+						<span class="badge badge-pill badge-light">Tranca</span>
+					</div>
+					<div class="col-sm">
+						<button class="btn btn-success btn-block" onclick="publish('unoesc/led_1','1')"> Abrir </button>
+					</div>
+					<div class="col-sm">
+						<button class="btn btn-danger btn-block" onclick="publish('unoesc/led_1','0')"> Fechar </button>
+					</div>
+				</div>
 			</div>
 
 			<div class="col-sm">
 				<h3 align="center">Cômodo 2</h3>
 				<hr>
-					<button type="Abrir" class="btn btn-success btn-lg btn-block" onclick="publish('unoesc/led_2','1')"> ... Abrir ... </button><br><br>
-					<button type="Fechar" class="btn btn-danger btn-lg btn-block" onclick="publish('unoesc/led_2','0')"> ... Fechar ... </button>
+				<button type="Abrir" class="btn btn-success btn-block" onclick="publish('unoesc/led_2','1')"> ... Abrir ...
+				</button><br><br>
+				<button type="Fechar" class="btn btn-danger btn-block" onclick="publish('unoesc/led_2','0')"> ... Fechar ...
+				</button>
 			</div>
 
 			<div class="col-sm">
 				<h3 align="center">Cômodo 3</h3>
 				<hr>
-					<button type="Abrir" class="btn btn-success btn-lg btn-block" onclick="publish('unoesc/led_3','1')"> ... Abrir ... </button><br><br>
-					<button type="Fechar" class="btn btn-danger btn-lg btn-block" onclick="publish('unoesc/led_3','0')"> ... Fechar ... </button>
+				<button type="Abrir" class="btn btn-success btn-block" onclick="publish('unoesc/led_3','1')"> ... Abrir ...
+				</button><br><br>
+				<button type="Fechar" class="btn btn-danger btn-block" onclick="publish('unoesc/led_3','0')"> ... Fechar ...
+				</button>
 			</div>
 		</div>
 
@@ -75,8 +103,10 @@
 
 				<h3 align="center">Alarme</h3>
 				<hr>
-					<button type="Abrir" class="btn btn-success btn-lg btn-block" onclick="publish('unoesc/ativar_alarme','1')"> ... Ligar ... </button><br><br>
-					<button type="Fechar" class="btn btn-danger btn-lg btn-block" onclick="publish('unoesc/ativar_alarme','0')"> ... Desligar ... </button>
+				<button type="Abrir" class="btn btn-success btn-block" onclick="publish('unoesc/ativar_alarme','1')"> ... Ligar ...
+				</button><br><br>
+				<button type="Fechar" class="btn btn-danger btn-block" onclick="publish('unoesc/ativar_alarme','0')"> ... Desligar
+					... </button>
 			</div>
 
 			<div class="col-sm">
@@ -94,7 +124,7 @@
 					<img src="img/inv.jpg" alt="Trulli" width="300" height="250">
 				</form>
 			</div>
-		</div>	
+		</div>
 	</div>
 
 	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
